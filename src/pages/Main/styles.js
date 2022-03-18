@@ -36,7 +36,7 @@ export const Form = styled.form`
 
     flex: 1;
 
-    border: 1px solid #dddddd;
+    border: 1px solid ${props => props.error ? '#ff0000' : '#dddddd'};
     border-radius: 4px;
 
     font-size: 17px;

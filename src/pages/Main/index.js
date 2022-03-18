@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 
 import { 
   Container,
@@ -24,14 +24,41 @@ function Main() {
 
   const [loading, setLoading] = useState(false);
 
+  const [alert, setAlert] = useState(null);
+
+  // DidMount
+  useEffect(() => {
+    const repoStorage = localStorage.getItem('repos');
+
+    if(repoStorage) {
+      setRepositories(JSON.parse(repoStorage));
+    };
+  }, []);
+  
+  // DidUpdate
+  useEffect(() => {
+    localStorage.setItem('repos', JSON.stringify(repositories));
+  }, [repositories]);
+
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
 
     async function submit() {
       setLoading(true);
+      setAlert(null);
 
       try {
+        if(newRepo === '') {
+          throw new Error('Você precisa indicar um repositorio!');
+        };
+
         const response = await api.get(`repos/${newRepo}`);
+
+        const hasRepo = repositories.find(repo => repo.name  === newRepo );
+
+        if(hasRepo) {
+          throw new Error('Repositório duplicado!');
+        };
 
         const data = {
           name: response.data.full_name,
@@ -40,6 +67,8 @@ function Main() {
         setRepositories([...repositories, data]);
         setNewRepo('');
       } catch(error) {
+        setAlert(true);
+
         console.log(error);
       } finally {
         setLoading(false);
@@ -51,6 +80,7 @@ function Main() {
 
   function handleInputChange(e) {
     setNewRepo(e.target.value);
+    setAlert(null);
   };
 
   const handleDelete = useCallback((repo) => {
@@ -66,7 +96,7 @@ function Main() {
         Meus Repositorios
       </h1>
 
-      <Form onSubmit={handleSubmit} >
+      <Form onSubmit={handleSubmit} error={alert} >
         <input 
           type="text" 
           placeholder="Adicionar Repositorios"
