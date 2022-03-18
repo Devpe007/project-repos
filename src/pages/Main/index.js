@@ -8,7 +8,8 @@ import {
 
 import { 
   FaGithub,
-  FaPlus, 
+  FaPlus,
+  FaSpinner,
 } from 'react-icons/fa';
 
 import api from '../../services/api';
@@ -17,18 +18,28 @@ function Main() {
   const [newRepo, setNewRepo] = useState('');
   const [repositories, setRepositories] = useState([]);
 
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
 
     async function submit() {
-      const response = await api.get(`repos/${newRepo}`);
+      setLoading(true);
 
-      const data = {
-        name: response.data.full_name,
+      try {
+        const response = await api.get(`repos/${newRepo}`);
+
+        const data = {
+          name: response.data.full_name,
+        };
+  
+        setRepositories([...repositories, data]);
+        setNewRepo('');
+      } catch(error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
       };
-
-      setRepositories([...repositories, data]);
-      setNewRepo('');
     };
 
     submit();
@@ -53,11 +64,18 @@ function Main() {
           onChange={handleInputChange}
         />
 
-        <SubmitButton>
-          <FaPlus
-            color="#ffffff"
-            size={14}
-          />
+        <SubmitButton loading={loading ? 1 : 0} >
+          {loading ? (
+            <FaSpinner 
+              color="#ffffff"
+              size={14} 
+            />
+          ) : (
+            <FaPlus
+              color="#ffffff"
+              size={14}
+            />
+          )}
         </SubmitButton>
       </Form>
     </Container>
