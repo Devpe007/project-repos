@@ -53,6 +53,12 @@ function Main() {
     setNewRepo(e.target.value);
   };
 
+  const handleDelete = useCallback((repo) => {
+    const find = repositories.filter(r => r.name !== repo);
+    
+    setRepositories(find);
+  }, [repositories]);
+
   return (
     <Container>
       <h1>
@@ -87,7 +93,7 @@ function Main() {
         {repositories.map(repo => (
           <li key={repo.name} >
             <span>
-              <DeleteButton onClick={() => {}}>
+              <DeleteButton onClick={() => handleDelete(repo.name)}>
                 <FaTrash size={14} />
               </DeleteButton>
               {repo.name}
