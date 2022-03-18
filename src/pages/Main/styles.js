@@ -43,7 +43,9 @@ export const Form = styled.form`
   }
 `;
 
-export const SubmitButton = styled.button`
+export const SubmitButton = styled.button.attrs({
+  type: 'submit'
+})`
   display: flex;
   justify-content: center;
   align-items: center;
