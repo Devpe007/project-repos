@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 
-import { Container } from './styles';
+import { 
+  Container,
+  Owner,
+  Loading,
+  BackButton,
+} from './styles';
+
+import { FaArrowLeft } from 'react-icons/fa';
 
 import api from '../../services/api';
 
@@ -31,11 +38,34 @@ function Repository({ match }) {
     };
 
     load();
-  }, []);
+  }, [match.params.repository]);
+
+  if(loading) {
+    return (
+      <Loading>
+        <h1>Carregando...</h1>
+      </Loading>
+    );
+  };
 
   return (
     <Container>
+      <BackButton to="/">
+        <FaArrowLeft 
+          color="#000000" 
+          size={35}
+        />
+      </BackButton>
 
+      <Owner>
+        <img 
+          src={repository.owner.avatar_url} 
+          alt={repository.owner.login} 
+        />
+
+        <h1>{repository.name}</h1>
+        <p>{repository.description}</p>
+      </Owner>
     </Container>
   );
 };
