@@ -6,6 +6,7 @@ import {
   Loading,
   BackButton,
   IssuesList,
+  PageActions,
 } from './styles';
 
 import { FaArrowLeft } from 'react-icons/fa';
@@ -17,6 +18,8 @@ function Repository({ match }) {
   const [issues, setIssues] = useState([]);
 
   const [loading, setLoading] = useState(true);
+
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     async function load() {
@@ -40,6 +43,28 @@ function Repository({ match }) {
 
     load();
   }, [match.params.repository]);
+
+  useEffect(() => {
+    async function loadIssue() {
+      const nameRepo = decodeURIComponent(match.params.repository);
+
+      const response = await api.get(`/repos/${nameRepo}/issues`, {
+        params: {
+          state: 'open',
+          page,
+          per_page: 5,
+        },
+      });
+
+      setIssues(response.data);
+    };
+
+    loadIssue();
+  }, [match.params.repository, page]);
+
+  function handlePage(action) {
+    setPage(action === 'back' ? page -1 : page + 1);
+  };
 
   if(loading) {
     return (
@@ -87,6 +112,15 @@ function Repository({ match }) {
           </li>
         ))}
       </IssuesList>
+
+      <PageActions>
+        <button type="button" onClick={() => handlePage('back')} disabled={page < 2} >
+          Voltar
+        </button>
+        <button type="button" onClick={() => handlePage('next')} >
+          Proxima
+        </button>
+      </PageActions>
     </Container>
   );
 };
