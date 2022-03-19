@@ -7,6 +7,7 @@ import {
   BackButton,
   IssuesList,
   PageActions,
+  FilterList,
 } from './styles';
 
 import { FaArrowLeft } from 'react-icons/fa';
@@ -21,6 +22,13 @@ function Repository({ match }) {
 
   const [page, setPage] = useState(1);
 
+  const [filterList, setFilterList] = useState([
+    { state: 'all', label: 'Todas', active: true },
+    { state: 'open', label: 'Abertas', active: false },
+    { state: 'closed', label: 'Fechadas', active: false },
+  ]);
+  const [filterIndex, setFilterIndex] = useState(0);
+
   useEffect(() => {
     async function load() {
       const nameRepo = decodeURIComponent(match.params.repository);
@@ -29,7 +37,7 @@ function Repository({ match }) {
         api.get(`/repos/${nameRepo}`),
         api.get(`/repos/${nameRepo}/issues`, {
           params: {
-            state: 'open',
+            state: filterList.find(f => f.active).state,
             per_page: 5,
           },
         }),
@@ -50,7 +58,7 @@ function Repository({ match }) {
 
       const response = await api.get(`/repos/${nameRepo}/issues`, {
         params: {
-          state: 'open',
+          state: filterList[filterIndex].state,
           page,
           per_page: 5,
         },
@@ -60,10 +68,14 @@ function Repository({ match }) {
     };
 
     loadIssue();
-  }, [match.params.repository, page]);
+  }, [filterList, filterIndex, match.params.repository, page]);
 
   function handlePage(action) {
     setPage(action === 'back' ? page -1 : page + 1);
+  };
+
+  function handleFilter(index) {
+    setFilterIndex(index);
   };
 
   if(loading) {
@@ -92,6 +104,18 @@ function Repository({ match }) {
         <h1>{repository.name}</h1>
         <p>{repository.description}</p>
       </Owner>
+
+      <FilterList active={filterIndex} >
+        {filterList.map((filter, index) => (
+          <button
+            type="button"
+            key={filter.label}
+            onClick={() => handleFilter(index)}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </FilterList>
 
       <IssuesList>
         {issues.map((issues) => (
